@@ -1,0 +1,80 @@
+%locations
+%error-verbose
+
+%{
+  #include <string>
+  
+  #include <common/termcolor.hh>
+  #include <parser/parser.hh>
+  #include <clang/AST/AST.h> // Single include.
+
+  extern uint32_t yylineno;
+  extern int yydebug;
+
+  extern int yylex(void);
+  extern int yyget_lineno(void);
+  extern int yylex_destroy(void);
+
+  #ifdef YYDEBUG
+  #undef YYDEBUG
+  #endif
+  #define YYDEBUG 1
+  # define YYLLOC_DEFAULT(Cur, Rhs, N)                          \
+  do {                                                          \
+      if (N) {                                                  \
+          (Cur).first_line   = YYRHSLOC(Rhs, 1).first_line;     \
+          (Cur).first_column = YYRHSLOC(Rhs, 1).first_column;   \
+          (Cur).last_line    = YYRHSLOC(Rhs, N).last_line;      \
+          (Cur).last_column  = YYRHSLOC(Rhs, N).last_column;    \
+      } else {                                                  \
+          (Cur).first_line   = (Cur).last_line   =              \
+              YYRHSLOC(Rhs, 0).last_line;                       \
+          (Cur).first_column = (Cur).last_column =              \
+              YYRHSLOC(Rhs, 0).last_column;                     \
+      }                                                         \
+  } while (0)
+
+  void yyerror(const char* str)
+  {
+      llvm::errs() << "\033[1;31;490m" << yylloc.first_line << ':'
+                   << yylloc.first_column << " : [ERROR]: " << str << "\033[0m" << std::endl;
+      yylex_destroy();
+  }
+
+  extern FILE* yyin;
+%}
+
+%token          ID_token
+// Operators 
+%token          ADD_token MINUS_token MUL_token DIV_token MOD_token INC_token DEC_token
+%token          EQ_token NEQ_token GEQ_token LEQ_token GT_token LT_token
+// Numbers and string
+%token          DECIMAL_token OCTAL_token HEX_token STRING_token CHAR_token
+// Keywords
+%token          IF_token ELSE_token DO_token WHILE_token FOR_token RETURN_token BREAK_token CONTINUE_token ASSIGN_token TRUE_token FALSE_token AND_token OR_token NOT_token DEF_token
+// Other symbols
+%token          LBRACE RBRACE LPARENTHESIS RPARENTHESIS LSQUARE RSQUARE
+%token          DOT COMMA
+%token          LET_token VAR_token
+
+%union {
+    std::string*                        raw_string;
+    char                                raw_char;
+}
+
+// Set the priority.
+%left  COMMA_token
+%right ASSIGN_token
+%left  OR_token
+%left  AND_token
+%left  NEQ_token EQ_token
+%left  LT_token LEQ_token GT_token GEQ_token
+%left  ADD_token MINUS_token
+%left  MUL_token DIV_token MOD_token
+%right NOT_token
+
+%start CompUnit
+%%
+
+// TODO
+CompUnit: ;

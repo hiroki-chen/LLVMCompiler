@@ -1,0 +1,10 @@
+# Ignore vs code configuration directory.
+.vscode
+
+.DS_Store
+
+build
+
+test
+
+backup
