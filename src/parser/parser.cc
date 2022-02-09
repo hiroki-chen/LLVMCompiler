@@ -106,11 +106,13 @@
      RPARENTHESIS = 295,
      LSQUARE = 296,
      RSQUARE = 297,
-     DOT = 298,
-     COMMA = 299,
-     LET_token = 300,
-     VAR_token = 301,
-     COMMA_token = 302
+     SEMICOLON = 298,
+     COLON = 299,
+     DOT = 300,
+     COMMA = 301,
+     LET_token = 302,
+     VAR_token = 303,
+     COMMA_token = 304
    };
 #endif
 /* Tokens.  */
@@ -154,11 +156,13 @@
 #define RPARENTHESIS 295
 #define LSQUARE 296
 #define RSQUARE 297
-#define DOT 298
-#define COMMA 299
-#define LET_token 300
-#define VAR_token 301
-#define COMMA_token 302
+#define SEMICOLON 298
+#define COLON 299
+#define DOT 300
+#define COMMA 301
+#define LET_token 302
+#define VAR_token 303
+#define COMMA_token 304
 
 
 
@@ -167,10 +171,12 @@
 #line 4 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
 
   #include <string>
+  #include <memory>
   
+  #include <AST/ast.hh> // Single include.
   #include <common/termcolor.hh>
   #include <parser/parser.hh>
-  #include <clang/AST/AST.h> // Single include.
+  #include <llvm/Support/raw_ostream.h>
 
   extern uint32_t yylineno;
   extern int yydebug;
@@ -201,7 +207,7 @@
   void yyerror(const char* str)
   {
       llvm::errs() << "\033[1;31;490m" << yylloc.first_line << ':'
-                   << yylloc.first_column << " : [ERROR]: " << str << "\033[0m";
+                   << yylloc.first_column << " : [ERROR]: " << str << "\033[0m\n";
       yylex_destroy();
   }
 
@@ -228,13 +234,22 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 60 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+#line 62 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
 {
-    std::string*                        raw_string;
-    char                                raw_char;
+  // Abstract syntax tree nodes.
+  kaleidoscope::RootAST*                               rootAST;
+  kaleidoscope::FunctionAST*                           functionAST;
+  kaleidoscope::VariableExprAST*                           VariableExprAST;
+  kaleidoscope::ExprAST*                               exprAST;
+  kaleidoscope::PrototypeAST*                          prototypeAST;
+  kaleidoscope::BlockAST*                              blockAST;
+
+  std::vector<kaleidoscope::VariableExprAST>*          parameterList;
+  std::string*                                         raw_string;
+  char                                                 raw_char;
 }
 /* Line 193 of yacc.c.  */
-#line 238 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
+#line 253 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -259,7 +274,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 263 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
+#line 278 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
 
 #ifdef short
 # undef short
@@ -474,22 +489,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  2
+#define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   0
+#define YYLAST   9
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  48
+#define YYNTOKENS  50
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  2
+#define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  2
+#define YYNRULES  10
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  3
+#define YYNSTATES  18
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   302
+#define YYMAXUTOK   304
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -527,7 +542,7 @@ static const yytype_uint8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47
+      45,    46,    47,    48,    49
 };
 
 #if YYDEBUG
@@ -535,19 +550,23 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3
+       0,     0,     3,     5,     7,     8,    10,    16,    21,    25,
+      27
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      49,     0,    -1,    -1
+      51,     0,    -1,    52,    -1,    54,    -1,    -1,     3,    -1,
+      36,    55,    37,    57,    38,    -1,    53,    39,    56,    40,
+      -1,    53,    46,    56,    -1,    53,    -1,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    79,    79
+       0,   100,   100,   101,   104,   106,   109,   112,   115,   116,
+     119
 };
 #endif
 
@@ -564,8 +583,9 @@ static const char *const yytname[] =
   "FOR_token", "RETURN_token", "BREAK_token", "CONTINUE_token",
   "ASSIGN_token", "TRUE_token", "FALSE_token", "AND_token", "OR_token",
   "NOT_token", "DEF_token", "LBRACE", "RBRACE", "LPARENTHESIS",
-  "RPARENTHESIS", "LSQUARE", "RSQUARE", "DOT", "COMMA", "LET_token",
-  "VAR_token", "COMMA_token", "$accept", "CompUnit", 0
+  "RPARENTHESIS", "LSQUARE", "RSQUARE", "SEMICOLON", "COLON", "DOT",
+  "COMMA", "LET_token", "VAR_token", "COMMA_token", "$accept", "CompUnit",
+  "Expr", "Variable", "FunctionDef", "PROTO", "PARAMS", "BODY", 0
 };
 #endif
 
@@ -578,20 +598,22 @@ static const yytype_uint16 yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    48,    49
+       0,    50,    51,    51,    52,    53,    54,    55,    56,    56,
+      57
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0
+       0,     2,     1,     1,     0,     1,     5,     4,     3,     1,
+       0
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -599,27 +621,29 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1
+       4,     0,     0,     2,     3,     5,     0,     0,     1,     0,
+      10,     9,     0,     0,     0,     7,     6,     8
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1
+      -1,     2,     3,    11,     4,     7,    12,    13
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -1
+#define YYPACT_NINF -42
 static const yytype_int8 yypact[] =
 {
-      -1,     0,    -1
+     -36,    -2,     2,   -42,   -42,   -42,   -35,   -34,   -42,    -2,
+     -42,   -41,   -33,   -32,    -2,   -42,   -42,   -42
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -1,    -1
+     -42,   -42,   -42,     7,   -42,   -42,    -5,   -42
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -629,19 +653,20 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       2
+       1,     5,     8,    10,     9,    14,    16,    15,     6,    17
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       0
+      36,     3,     0,    37,    39,    46,    38,    40,     1,    14
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    49,     0
+       0,    36,    51,    52,    54,     3,    53,    55,     0,    39,
+      37,    53,    56,    57,    46,    40,    38,    56
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1477,9 +1502,44 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-      
+        case 2:
+#line 100 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { kaleidoscope::RootAST* const root = new kaleidoscope::RootAST(); (yyval.rootAST) = root; (yyval.rootAST)->addChild((yyvsp[(1) - (1)].exprAST)); ;}
+    break;
+
+  case 3:
+#line 101 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { kaleidoscope::RootAST* const root = new kaleidoscope::RootAST(); (yyval.rootAST) = root; (yyval.rootAST)->addChild((yyvsp[(1) - (1)].functionAST)); ;}
+    break;
+
+  case 5:
+#line 106 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { kaleidoscope::VariableExprAST* const variable = new kaleidoscope::VariableExprAST(*(yyvsp[(1) - (1)].raw_string)); (yyval.VariableExprAST) = variable; ;}
+    break;
+
+  case 6:
+#line 109 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { (yyval.functionAST) = new kaleidoscope::FunctionAST((yyvsp[(2) - (5)].prototypeAST), (yyvsp[(4) - (5)].blockAST)); ;}
+    break;
+
+  case 7:
+#line 112 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { (yyval.prototypeAST) = new kaleidoscope::PrototypeAST(std::unique_ptr<kaleidoscope::VariableExprAST>((yyvsp[(1) - (4)].VariableExprAST)), (yyvsp[(3) - (4)].parameterList)); ;}
+    break;
+
+  case 8:
+#line 115 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { (yyvsp[(3) - (3)].parameterList)->emplace_back(*(yyvsp[(1) - (3)].VariableExprAST)); (yyval.parameterList) = (yyvsp[(3) - (3)].parameterList); ;}
+    break;
+
+  case 9:
+#line 116 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+    { std::vector<kaleidoscope::VariableExprAST> paramList; paramList.emplace_back(*(yyvsp[(1) - (1)].VariableExprAST)); (yyval.parameterList) = &paramList; ;}
+    break;
+
+
 /* Line 1267 of yacc.c.  */
-#line 1483 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
+#line 1543 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.cc"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

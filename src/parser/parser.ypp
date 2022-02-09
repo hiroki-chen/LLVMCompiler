@@ -3,10 +3,12 @@
 
 %{
   #include <string>
+  #include <memory>
   
+  #include <AST/ast.hh> // Single include.
   #include <common/termcolor.hh>
   #include <parser/parser.hh>
-  #include <clang/AST/AST.h> // Single include.
+  #include <llvm/Support/raw_ostream.h>
 
   extern uint32_t yylineno;
   extern int yydebug;
@@ -37,7 +39,7 @@
   void yyerror(const char* str)
   {
       llvm::errs() << "\033[1;31;490m" << yylloc.first_line << ':'
-                   << yylloc.first_column << " : [ERROR]: " << str << "\033[0m" << std::endl;
+                   << yylloc.first_column << " : [ERROR]: " << str << "\033[0m\n";
       yylex_destroy();
   }
 
@@ -53,13 +55,22 @@
 // Keywords
 %token          IF_token ELSE_token DO_token WHILE_token FOR_token RETURN_token BREAK_token CONTINUE_token ASSIGN_token TRUE_token FALSE_token AND_token OR_token NOT_token DEF_token
 // Other symbols
-%token          LBRACE RBRACE LPARENTHESIS RPARENTHESIS LSQUARE RSQUARE
+%token          LBRACE RBRACE LPARENTHESIS RPARENTHESIS LSQUARE RSQUARE SEMICOLON COLON
 %token          DOT COMMA
 %token          LET_token VAR_token
 
 %union {
-    std::string*                        raw_string;
-    char                                raw_char;
+  // Abstract syntax tree nodes.
+  kaleidoscope::RootAST*                               rootAST;
+  kaleidoscope::FunctionAST*                           functionAST;
+  kaleidoscope::VariableExprAST*                           VariableExprAST;
+  kaleidoscope::ExprAST*                               exprAST;
+  kaleidoscope::PrototypeAST*                          prototypeAST;
+  kaleidoscope::BlockAST*                              blockAST;
+
+  std::vector<kaleidoscope::VariableExprAST>*          parameterList;
+  std::string*                                         raw_string;
+  char                                                 raw_char;
 }
 
 // Set the priority.
@@ -73,8 +84,36 @@
 %left  MUL_token DIV_token MOD_token
 %right NOT_token
 
+%type <rootAST> CompUnit
+%type <functionAST> FunctionDef
+%type <VariableExprAST> Variable
+%type <exprAST> Expr
+%type <prototypeAST> PROTO
+%type <blockAST> BODY
+%type <raw_string> ID_token
+%type <parameterList> PARAMS
+
 %start CompUnit
 %%
 
-// TODO
-CompUnit: ;
+// TODO: Convert all the raw pointers to their corresponding unique_ptrs.
+CompUnit: Expr                  { kaleidoscope::RootAST* const root = new kaleidoscope::RootAST(); $$ = root; $$->addChild($1); }
+        | FunctionDef           { kaleidoscope::RootAST* const root = new kaleidoscope::RootAST(); $$ = root; $$->addChild($1); }
+        ;
+
+Expr:  ;
+
+Variable: ID_token                 { kaleidoscope::VariableExprAST* const variable = new kaleidoscope::VariableExprAST(*$1); $$ = variable; }
+        ;
+
+FunctionDef: DEF_token PROTO LBRACE BODY RBRACE { $$ = new kaleidoscope::FunctionAST($2, $4); }
+           ;
+
+PROTO: Variable LPARENTHESIS PARAMS RPARENTHESIS { $$ = new kaleidoscope::PrototypeAST(std::unique_ptr<kaleidoscope::VariableExprAST>($1), $3); }
+     ; 
+
+PARAMS: Variable COMMA PARAMS   { $3->emplace_back(*$1); $$ = $3; }
+      | Variable                { std::vector<kaleidoscope::VariableExprAST> paramList; paramList.emplace_back(*$1); $$ = &paramList; }
+      ;
+
+BODY: ;

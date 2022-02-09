@@ -79,11 +79,13 @@
      RPARENTHESIS = 295,
      LSQUARE = 296,
      RSQUARE = 297,
-     DOT = 298,
-     COMMA = 299,
-     LET_token = 300,
-     VAR_token = 301,
-     COMMA_token = 302
+     SEMICOLON = 298,
+     COLON = 299,
+     DOT = 300,
+     COMMA = 301,
+     LET_token = 302,
+     VAR_token = 303,
+     COMMA_token = 304
    };
 #endif
 /* Tokens.  */
@@ -127,24 +129,35 @@
 #define RPARENTHESIS 295
 #define LSQUARE 296
 #define RSQUARE 297
-#define DOT 298
-#define COMMA 299
-#define LET_token 300
-#define VAR_token 301
-#define COMMA_token 302
+#define SEMICOLON 298
+#define COLON 299
+#define DOT 300
+#define COMMA 301
+#define LET_token 302
+#define VAR_token 303
+#define COMMA_token 304
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 60 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+#line 62 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
 {
-    std::string*                        raw_string;
-    char                                raw_char;
+  // Abstract syntax tree nodes.
+  kaleidoscope::RootAST*                               rootAST;
+  kaleidoscope::FunctionAST*                           functionAST;
+  kaleidoscope::VariableExprAST*                           VariableExprAST;
+  kaleidoscope::ExprAST*                               exprAST;
+  kaleidoscope::PrototypeAST*                          prototypeAST;
+  kaleidoscope::BlockAST*                              blockAST;
+
+  std::vector<kaleidoscope::VariableExprAST>*          parameterList;
+  std::string*                                         raw_string;
+  char                                                 raw_char;
 }
 /* Line 1529 of yacc.c.  */
-#line 148 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
+#line 161 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

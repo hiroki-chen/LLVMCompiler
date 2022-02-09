@@ -22,6 +22,7 @@
 using namespace llvm;
 
 // Predefined command line fields and their usage.
+// The command line variables are stored globally.
 cl::opt<std::string> outputFileName("o", cl::desc("Specify output filename"),
                                     cl::value_desc("filename"));
 cl::opt<std::string> sourceFileName(cl::Positional, cl::desc("<input file>"),

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 
+#include <AST/ast.hh>
 #include <parser/parser.hh>
 #include <llvm/Support/raw_ostream.h>
 
@@ -70,6 +71,8 @@ CHAR        '\\?.'
 ")"          { return RPARENTHESIS; }
 "."          { return DOT; }
 ","          { return COMMA; }
+";"          { return SEMICOLON; }
+":"          { return COLON; }
 
 "=="         { return EQ_token; }
 ">="         { return GEQ_token; }

@@ -16,6 +16,8 @@
  */
 #include <memory>
 
+#include <llvm/Support/raw_ostream.h>
+
 #include <common/termcolor.hh>
 #include <runtime/runtime.hh>
 
@@ -28,12 +30,15 @@ static const auto __ = []() {
 }();
 
 using kaleidoscope::KaleidoscopeRuntime;
+using llvm::errs;
 
 int main(int argc, const char** argv) {
-  
+
   const std::unique_ptr<KaleidoscopeRuntime> kaleidoscopeRuntime =
       std::make_unique<KaleidoscopeRuntime>(argc, argv);
   kaleidoscopeRuntime->run();
+  
+  errs() << "The Kaleidoscope compiler is running!\n";
 
   return 0;
 }
