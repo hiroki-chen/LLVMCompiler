@@ -18,37 +18,53 @@
 #define RUNTIME_HH
 
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include <llvm/ADT/StringRef.h>
+#include <llvm/IR/IRBuilder.h>
 
-namespace kaleidoscope {
+#include <nodes/item_all.hh>
+
+namespace compiler {
 
 // Use StringRef instead of const char*.
-const llvm::StringRef additionalMessage = " This is a toy compiler for a python-C-mix language written by Haobin Chen.";
+const llvm::StringRef additionalMessage =
+    " This is a toy compiler for a C-like language written by Haobin Chen.";
+// For IR generation.
+static llvm::LLVMContext context;
+static llvm::IRBuilder<> irBuilder(context);
+static std::unique_ptr<llvm::Module> thisModule;
 
 // Specify the optimization level.
-enum OptLevel {
-  g, O1, O2, O3
-};
+enum OptLevel { g, O1, O2, O3 };
 
-class KaleidoscopeRuntime final {
+class CompilerRuntime final {
  private:
   // The path of the source file.
   std::string inputFile;
-
   // The path of the output file.
   std::string outputFile;
+
+  // Root node of the AST.
+  Item_root* root;
+
+  // An interface which is used to generate LLVM IR.
+  void codeGenerate(std::ostream& out) const;
+
+  void astGenerate(std::ostream& out) const;
 
  public:
   void run();
 
-  KaleidoscopeRuntime() = delete;
+  CompilerRuntime() = delete;
 
-  KaleidoscopeRuntime(int argc, const char** argv);
+  CompilerRuntime(int argc, const char** argv);
 
-  ~KaleidoscopeRuntime() = default;
+  void setRoot(Item_root* const root) { this->root = root; }
+
+  ~CompilerRuntime() = default;
 };
-}  // namespace kaleidoscope
+}  // namespace compiler
 
 #endif

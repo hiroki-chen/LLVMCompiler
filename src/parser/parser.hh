@@ -39,112 +39,147 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     ID_token = 258,
-     ADD_token = 259,
-     MINUS_token = 260,
-     MUL_token = 261,
-     DIV_token = 262,
-     MOD_token = 263,
-     INC_token = 264,
-     DEC_token = 265,
-     EQ_token = 266,
-     NEQ_token = 267,
-     GEQ_token = 268,
-     LEQ_token = 269,
-     GT_token = 270,
-     LT_token = 271,
-     DECIMAL_token = 272,
-     OCTAL_token = 273,
-     HEX_token = 274,
-     STRING_token = 275,
-     CHAR_token = 276,
-     IF_token = 277,
-     ELSE_token = 278,
-     DO_token = 279,
-     WHILE_token = 280,
-     FOR_token = 281,
-     RETURN_token = 282,
-     BREAK_token = 283,
-     CONTINUE_token = 284,
-     ASSIGN_token = 285,
-     TRUE_token = 286,
-     FALSE_token = 287,
-     AND_token = 288,
-     OR_token = 289,
-     NOT_token = 290,
-     DEF_token = 291,
-     LBRACE = 292,
-     RBRACE = 293,
-     LPARENTHESIS = 294,
-     RPARENTHESIS = 295,
-     LSQUARE = 296,
-     RSQUARE = 297,
-     DOT = 298,
-     COMMA = 299,
-     LET_token = 300,
-     VAR_token = 301,
-     COMMA_token = 302
+     ID = 258,
+     ADD = 259,
+     MINUS = 260,
+     MUL = 261,
+     DIV = 262,
+     MOD = 263,
+     INC = 264,
+     DEC = 265,
+     EQ = 266,
+     NEQ = 267,
+     GEQ = 268,
+     LEQ = 269,
+     G = 270,
+     L = 271,
+     BIT_AND = 272,
+     BIT_OR = 273,
+     BIT_XOR = 274,
+     BIT_NEG = 275,
+     LOGIC_AND = 276,
+     LOGIC_OR = 277,
+     LOGIC_NOT = 278,
+     DECIMAL = 279,
+     OCTAL = 280,
+     HEX = 281,
+     STRING = 282,
+     INT = 283,
+     DOUBLE = 284,
+     FLOAT = 285,
+     CHAR = 286,
+     VOID = 287,
+     STRUCT_TOKEN = 288,
+     IF = 289,
+     ELSE = 290,
+     DO = 291,
+     WHILE = 292,
+     FOR = 293,
+     RETURN = 294,
+     BREAK = 295,
+     CONTINUE = 296,
+     CONST = 297,
+     ASSIGN = 298,
+     TRUE = 299,
+     FALSE = 300,
+     LBRACE = 301,
+     RBRACE = 302,
+     LPARENTHESIS = 303,
+     RPARENTHESIS = 304,
+     LSQUARE = 305,
+     RSQUARE = 306,
+     SEMICOLON = 307,
+     DOT = 308,
+     COMMA = 309
    };
 #endif
 /* Tokens.  */
-#define ID_token 258
-#define ADD_token 259
-#define MINUS_token 260
-#define MUL_token 261
-#define DIV_token 262
-#define MOD_token 263
-#define INC_token 264
-#define DEC_token 265
-#define EQ_token 266
-#define NEQ_token 267
-#define GEQ_token 268
-#define LEQ_token 269
-#define GT_token 270
-#define LT_token 271
-#define DECIMAL_token 272
-#define OCTAL_token 273
-#define HEX_token 274
-#define STRING_token 275
-#define CHAR_token 276
-#define IF_token 277
-#define ELSE_token 278
-#define DO_token 279
-#define WHILE_token 280
-#define FOR_token 281
-#define RETURN_token 282
-#define BREAK_token 283
-#define CONTINUE_token 284
-#define ASSIGN_token 285
-#define TRUE_token 286
-#define FALSE_token 287
-#define AND_token 288
-#define OR_token 289
-#define NOT_token 290
-#define DEF_token 291
-#define LBRACE 292
-#define RBRACE 293
-#define LPARENTHESIS 294
-#define RPARENTHESIS 295
-#define LSQUARE 296
-#define RSQUARE 297
-#define DOT 298
-#define COMMA 299
-#define LET_token 300
-#define VAR_token 301
-#define COMMA_token 302
+#define ID 258
+#define ADD 259
+#define MINUS 260
+#define MUL 261
+#define DIV 262
+#define MOD 263
+#define INC 264
+#define DEC 265
+#define EQ 266
+#define NEQ 267
+#define GEQ 268
+#define LEQ 269
+#define G 270
+#define L 271
+#define BIT_AND 272
+#define BIT_OR 273
+#define BIT_XOR 274
+#define BIT_NEG 275
+#define LOGIC_AND 276
+#define LOGIC_OR 277
+#define LOGIC_NOT 278
+#define DECIMAL 279
+#define OCTAL 280
+#define HEX 281
+#define STRING 282
+#define INT 283
+#define DOUBLE 284
+#define FLOAT 285
+#define CHAR 286
+#define VOID 287
+#define STRUCT_TOKEN 288
+#define IF 289
+#define ELSE 290
+#define DO 291
+#define WHILE 292
+#define FOR 293
+#define RETURN 294
+#define BREAK 295
+#define CONTINUE 296
+#define CONST 297
+#define ASSIGN 298
+#define TRUE 299
+#define FALSE 300
+#define LBRACE 301
+#define RBRACE 302
+#define LPARENTHESIS 303
+#define RPARENTHESIS 304
+#define LSQUARE 305
+#define RSQUARE 306
+#define SEMICOLON 307
+#define DOT 308
+#define COMMA 309
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 60 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+#line 65 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
 {
+    compiler::basic_type                btype;
+    compiler::Item_root*                item_root;               // root
+    compiler::Item_decl*                item_decl;
+    compiler::Item_stmt*                item_stmt;
+    compiler::Item_stmt_decl*           item_stmt_decl;
+    compiler::Item_func_def*            item_func_def;
+    compiler::Item_expr*                item_expr;
+    compiler::Item_expr_comma*          item_expr_comma;
+    compiler::Item_ident*               item_ident;
+    compiler::Item_ident_array*         item_ident_array;
+    compiler::Item_ident_pointer*       item_ident_pointer;
+    compiler::Item_decl_array_init*     item_decl_array_init;
+    compiler::Item_literal*             item_literal;
+    compiler::Item_literal_array_init*  item_literal_array_init;
+    compiler::Item_decl_var*            item_decl_var;
+    compiler::Item_decl_var_init*       item_decl_var_init;
+    compiler::Item_func_def_list*       item_func_def_list;
+    compiler::Item_func_def_arg*        item_func_def_arg;
+    compiler::Item_func_call_list*      item_func_call_list;
+    compiler::Item_block*               item_block;
+    compiler::Item_struct_body*         item_struct_body;
     std::string*                        raw_string;
     char                                raw_char;
 }
 /* Line 1529 of yacc.c.  */
-#line 148 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
+#line 183 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

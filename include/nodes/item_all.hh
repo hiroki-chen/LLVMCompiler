@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2022 Haobin Chen
+ Copyright (c) 2021 Haobin Chen
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,17 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <memory>
-#include <iostream>
+#ifndef ITEM_ALL_HH
+#define ITEM_ALL_HH
 
-#include <runtime/runtime.hh>
+// A single header that includes all.
 
-static const auto __ = []() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-  std::setvbuf(stdout, nullptr, _IOFBF, BUFSIZ);
-  return nullptr;
-}();
+#include <nodes/item.hh>
+#include <nodes/item_decl.hh>
+#include <nodes/item_expr.hh>
+#include <nodes/item_func.hh>
+#include <nodes/item_ident.hh>
+#include <nodes/item_literal.hh>
+#include <nodes/item_stmt.hh>
 
-using compiler::CompilerRuntime;
-
-// A shared compiler runtime.
-std::unique_ptr<CompilerRuntime> runtime;
-
-int main(int argc, const char** argv) {
-  runtime = std::make_unique<CompilerRuntime>(argc, argv);
-  runtime->run();
-
-  return 0;
-}
+#endif

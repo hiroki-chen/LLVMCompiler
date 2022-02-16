@@ -1,16 +1,24 @@
 %option noyywrap
 %option yylineno
-
 %{
+    /*************************************************************
+    expr.l
+    LEX FILE
+    Date: 2021/10/18
+    Haobin Chen (@Aoyamahiroki) <etyyuiope@gmail.com>
+
+    Defines regular expressions.
+    **************************************************************/
+#include <llvm/Support/raw_ostream.h>
+#include <nodes/item_all.hh>
+#include <parser/parser.hh>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <cstdint>
 #include <string>
-
-#include <parser/parser.hh>
-#include <llvm/Support/raw_ostream.h>
 
 extern void yyerror(const char* error_information);
 int yycolumn = 1;
@@ -28,39 +36,59 @@ int yycolumn = 1;
                        yylloc.last_column = yycolumn - 1;
 %}
 
+
 DECIMAL     ([0-9]+\.?[0-9]*|\.[0-9]+)
 OCTAL       0([0-7]+)
 HEX         (0x|0X)([0-9a-fA-F]+)
 ID          [[:alpha:]_][[:alpha:][:digit:]_]*
 EMPTY       [ \t\n\r]+
-COMMENT     #[^\n\r]*(\n|\r|\n\r)
+COMMENT     \/\/[^\n\r]*(\n|\r|\n\r)
 BEGIN       \/\*
 STRING      \"[^\"]*\"
 CHAR        '\\?.'
 
 %%
 {COMMENT} { ; }
+{BEGIN} {
+    // Handles mutilline comment.
+    char c;
+    while ((c = yyinput()) != 0) {
+        if (c == '\n') {
+            yylineno ++;
+            yycolumn = 1;
+        } else if (c == '*') {
+            if ((c = yyinput()) == '/') {
+                break;
+            } else {
+                unput(c);
+            }
+        }
+    }
+}
 
-"if"         { return IF_token; }
-"else"       { return ELSE_token; }
-"do"         { return DO_token; }
-"while"      { return WHILE_token; }
-"true"       { return TRUE_token; }
-"false"      { return FALSE_token; }
-"return"     { return RETURN_token; }
-"continue"   { return CONTINUE_token; }
-"break"      { return BREAK_token; }
-"for"        { return FOR_token; }
-"def"        { return DEF_token; }
-"and"        { return AND_token; }
-"or"         { return OR_token; }
-"not"        { return NOT_token; }
-"var"        { return VAR_token; }
-"let"        { return LET_token; }
+"int"        { return INT; }
+"double"     { return DOUBLE; }
+"float"      { return FLOAT; } 
+"char"       { return CHAR; }
+"void"       { return VOID; }
+"my_string"  { return STRING; }
 
-{HEX}        { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 16))); return HEX_token; }
-{OCTAL}      { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 8))); return OCTAL_token; }
-{DECIMAL}    { yylval.raw_string = new std::string(yytext, yyleng); return DECIMAL_token; }
+"if"         { return IF; }
+"else"       { return ELSE; }
+"do"         { return DO; }
+"while"      { return WHILE; }
+"true"       { return TRUE; }
+"false"      { return FALSE; }
+"return"     { return RETURN; }
+"continue"   { return CONTINUE; }
+"break"      { return BREAK; }
+"for"        { return FOR; }
+"const"      { return CONST; }
+"struct"     { return STRUCT_TOKEN; }
+
+{HEX}        { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 16))); return HEX; }
+{OCTAL}      { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 8))); return OCTAL; }
+{DECIMAL}    { yylval.raw_string = new std::string(yytext, yyleng); return DECIMAL; }
 
 "["          { return LSQUARE; }
 "]"          { return RSQUARE; }
@@ -68,34 +96,45 @@ CHAR        '\\?.'
 "}"          { return RBRACE; }
 "("          { return LPARENTHESIS; }
 ")"          { return RPARENTHESIS; }
+";"          { return SEMICOLON; }
 "."          { return DOT; }
 ","          { return COMMA; }
 
-"=="         { return EQ_token; }
-">="         { return GEQ_token; }
-"<="         { return LEQ_token; }
-"<"          { return LT_token; }
-">"          { return GT_token; }
-"!="         { return NEQ_token; }
+"=="         { return EQ; }
+">="         { return GEQ; }
+"<="         { return LEQ; }
+"<"          { return L; }
+">"          { return G; }
+"!="         { return NEQ; }
 
-"="          { return ASSIGN_token; }
+"="          { return ASSIGN; }
 
-"++"         { return INC_token; }
-"--"         { return DEC_token; }
-"+"          { return ADD_token; }
-"-"          { return MINUS_token; }
-"*"          { return MUL_token; }
-"/"          { return DIV_token; }
-"%"          { return MOD_token; }
+"&&"         { return LOGIC_AND; }
+"||"         { return LOGIC_OR; }
+"!"          { return LOGIC_NOT; }
 
-{ID}         { yylval.raw_string = new std::string(yytext, yyleng); return ID_token; }
-{CHAR}       { yylval.raw_char = yytext[1]; return CHAR_token; }
-{STRING}     { yylval.raw_string = new std::string(yytext, yyleng); return STRING_token; }
+"&"          { return BIT_AND; }
+"|"          { return BIT_OR; }
+"^"          { return BIT_XOR; }
+"~"          { return BIT_NEG; }
+
+"++"         { return INC; }
+"--"         { return DEC; }
+"+"          { return ADD; }
+"-"          { return MINUS; }
+"*"          { return MUL; }
+"/"          { return DIV; }
+"%"          { return MOD; }
+
+{ID}         { yylval.raw_string = new std::string(yytext, yyleng); return ID; }
+{CHAR}       { yylval.raw_char = yytext[1]; return CHAR; }
+{STRING}     { yylval.raw_string = new std::string(yytext, yyleng); return STRING; }
 {EMPTY}      { ; }
 
 . { 
-  llvm::errs() << "Error: Unknown character!";
+    llvm::errs() << "Unknown character.\n";
 }
+
 
 <<EOF>> { yyterminate(); }
 

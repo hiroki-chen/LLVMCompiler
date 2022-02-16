@@ -14,27 +14,20 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <memory>
-#include <iostream>
+#include <common/termcolor.hh>
+#include <common/utils.hh>
 
-#include <runtime/runtime.hh>
+void compiler::print_indent(const uint32_t& indent, const bool& leaf,
+                            std::ostream& os) {
+  // Print indentation.
+  for (uint32_t i = 0; i < indent; i += 2) {
+    os << termcolor::bright_green << "│  " << termcolor::reset;
+  }
 
-static const auto __ = []() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-  std::setvbuf(stdout, nullptr, _IOFBF, BUFSIZ);
-  return nullptr;
-}();
-
-using compiler::CompilerRuntime;
-
-// A shared compiler runtime.
-std::unique_ptr<CompilerRuntime> runtime;
-
-int main(int argc, const char** argv) {
-  runtime = std::make_unique<CompilerRuntime>(argc, argv);
-  runtime->run();
-
-  return 0;
+  // Print node.
+  if (leaf) {
+    os << termcolor::bright_green << (std::string) "└──" << termcolor::reset;
+  } else {
+    os << termcolor::bright_green << (std::string) "├──" << termcolor::reset;
+  }
 }

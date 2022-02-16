@@ -14,27 +14,23 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <memory>
-#include <iostream>
+#ifndef UTILS_HH
+#define UTILS_HH
 
-#include <runtime/runtime.hh>
+#include <cstdint>
+#include <ostream>
 
-static const auto __ = []() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-  std::setvbuf(stdout, nullptr, _IOFBF, BUFSIZ);
-  return nullptr;
-}();
 
-using compiler::CompilerRuntime;
+namespace compiler {
+/**
+ * @brief Print indentation for each node in the AST.
+ *
+ * @param indent
+ * @param leaf
+ * @param os
+ */
+void print_indent(const uint32_t& indent, const bool& leaf, std::ostream& os);
 
-// A shared compiler runtime.
-std::unique_ptr<CompilerRuntime> runtime;
+}  // namespace compiler
 
-int main(int argc, const char** argv) {
-  runtime = std::make_unique<CompilerRuntime>(argc, argv);
-  runtime->run();
-
-  return 0;
-}
+#endif

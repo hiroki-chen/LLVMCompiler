@@ -14,8 +14,10 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cassert>
 
 #include <llvm/Support/CommandLine.h>
+#include <llvm/Support/ErrorHandling.h>
 
 #include <runtime/runtime.hh>
 
@@ -30,16 +32,14 @@ cl::opt<bool> emitLLVM("emit-llvm",
                        cl::desc("Output the LLVM IR for the source program"),
                        cl::Optional);
 cl::opt<bool> verbose("verbose", cl::desc("Enable verbose mode"), cl::Optional);
-cl::opt<kaleidoscope::OptLevel> optimizationLevel(
+cl::opt<compiler::OptLevel> optimizationLevel(
     cl::desc("Choose optimization level:"),
-    cl::values(clEnumValN(kaleidoscope::OptLevel::g, "g",
-                          "Debug mode, no optimizations"),
-               clEnumValN(kaleidoscope::OptLevel::O1, "O1",
-                          "Enable trivial optmiations"),
-               clEnumValN(kaleidoscope::OptLevel::O2, "O2",
-                          "Enable default optmiations"),
-               clEnumValN(kaleidoscope::OptLevel::O3, "O3",
-                          "Enable radical optmiations (may cause problems)")));
+    cl::values(
+        clEnumValN(compiler::OptLevel::g, "g", "Debug mode, no optimizations"),
+        clEnumValN(compiler::OptLevel::O1, "O1", "Enable trivial optmiations"),
+        clEnumValN(compiler::OptLevel::O2, "O2", "Enable default optmiations"),
+        clEnumValN(compiler::OptLevel::O3, "O3",
+                   "Enable radical optmiations (may cause problems)")));
 
 // External interfaces and variables provided by the yacc.
 extern int yyparse();
@@ -48,13 +48,13 @@ extern void yyset_lineno(int);
 extern int yycolumn;
 extern void yyset_in(FILE*);
 
-kaleidoscope::KaleidoscopeRuntime::KaleidoscopeRuntime(int argc,
-                                                       const char** argv) {
+compiler::CompilerRuntime::CompilerRuntime(int argc, const char** argv)
+    : root(nullptr) {
   // Feed the command line parser.
   cl::ParseCommandLineOptions(argc, argv, additionalMessage);
 }
 
-void kaleidoscope::KaleidoscopeRuntime::run() {
+void compiler::CompilerRuntime::run() {
   inputFile = sourceFileName;
   outputFile = outputFileName;
 
@@ -63,4 +63,13 @@ void kaleidoscope::KaleidoscopeRuntime::run() {
   yyset_in(fopen(inputFile.c_str(), "r"));
   yyparse();
   yylex_destroy();
+}
+
+void compiler::CompilerRuntime::codeGenerate(std::ostream& out) const {}
+
+void compiler::CompilerRuntime::astGenerate(std::ostream& out) const {
+  errs() << "Generating AST for the source file...\n";
+
+  assert(root != nullptr && "The root node cannot be null!");
+  out << root->print_result();
 }

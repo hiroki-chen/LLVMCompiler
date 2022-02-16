@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2022 Haobin Chen
+ Copyright (c) 2021 Haobin Chen
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,32 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <memory>
-#include <iostream>
+#include <nodes/item.hh>
 
-#include <runtime/runtime.hh>
+#include <string>
+#include <sstream>
 
-static const auto __ = []() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-  std::setvbuf(stdout, nullptr, _IOFBF, BUFSIZ);
-  return nullptr;
-}();
+compiler::Item::Item(const uint32_t& line_no)
+    : line_no(line_no)
+{
+}
 
-using compiler::CompilerRuntime;
+compiler::Item_root::Item_root(const uint32_t& line_no)
+    : Item(line_no)
+{
+}
 
-// A shared compiler runtime.
-std::unique_ptr<CompilerRuntime> runtime;
+void compiler::Item_root::add_child(Item* const child)
+{
+    children.emplace_back(child);
+}
 
-int main(int argc, const char** argv) {
-  runtime = std::make_unique<CompilerRuntime>(argc, argv);
-  runtime->run();
-
-  return 0;
+std::string compiler::Item_root::print_result(const uint32_t& indent, const bool& leaf) const
+{
+    std::ostringstream oss;
+    oss << "ROOT: ";
+    for (uint32_t i = 0; i < children.size(); i++) {
+        oss << children[i]->print_result() << std::endl;
+    }
+    return oss.str();
 }
