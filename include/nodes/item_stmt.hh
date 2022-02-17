@@ -120,10 +120,12 @@ protected:
 
     Item_stmt* const statement; // while body
 
+    bool isDoWhile;
+
 public:
     Item_stmt_while() = delete;
 
-    Item_stmt_while(const uint32_t& line_no, Item_expr* const condition, Item_stmt* const statement);
+    Item_stmt_while(const uint32_t& line_no, Item_expr* const condition, Item_stmt* const statement, bool isDoWhile = false);
 
     virtual Item_stmt::stmt_type get_stmt_type(void) const override { return Item_stmt::stmt_type::WHILE_STMT; }
 

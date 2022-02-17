@@ -30,11 +30,11 @@ static const auto __ = []() {
 using compiler::CompilerRuntime;
 
 // A shared compiler runtime.
-std::unique_ptr<CompilerRuntime> runtime;
+std::unique_ptr<CompilerRuntime> compiler_runtime;
 
 int main(int argc, const char** argv) {
-  runtime = std::make_unique<CompilerRuntime>(argc, argv);
-  runtime->run();
+  compiler_runtime = std::make_unique<CompilerRuntime>(argc, argv);
+  compiler_runtime->run();
 
   return 0;
 }

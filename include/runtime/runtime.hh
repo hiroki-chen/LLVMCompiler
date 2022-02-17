@@ -50,9 +50,9 @@ class CompilerRuntime final {
   Item_root* root;
 
   // An interface which is used to generate LLVM IR.
-  void codeGenerate(std::ostream& out) const;
+  void codeGenerate(llvm::raw_ostream& out) const;
 
-  void astGenerate(std::ostream& out) const;
+  void astGenerate(llvm::raw_ostream& out) const;
 
  public:
   void run();

@@ -14,8 +14,11 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <nodes/item_ident.hh>
 #include <sstream>
+
+#include <nodes/item_ident.hh>
+#include <common/utils.hh>
+#include <common/termcolor.hh>
 
 compiler::Item_ident::Item_ident(const uint32_t& line_no, const std::string& name)
     : Item_expr(line_no)
@@ -39,23 +42,37 @@ void compiler::Item_ident_array::add_shape(Item_expr* const shape)
     array_shape.emplace_back(shape);
 }
 
-// TODO: We need to lookup the symbol table and get its value :)
-std::string
-compiler::Item_ident::print_result(const uint32_t& indent, const bool& leaf) const
-{
-    std::ostringstream oss;
-    oss << "Node: Identifier with name " << name;
-    return oss.str();
+std::string compiler::Item_ident::print_result(const uint32_t& indent,
+                                               const bool& leaf) const {
+  std::ostringstream oss;
+
+  print_indent(indent, leaf, oss);
+  oss << " Identifier with name " << termcolor::red << name << termcolor::reset
+      << '\n';
+  return oss.str();
 }
 
-std::string
-compiler::Item_ident_array::print_result(const uint32_t& indent, const bool& leaf) const
-{
-    std::ostringstream oss;
-    oss << "Node: Array Identifier with name " << name << ", and the shape is ";
-    for (auto item : array_shape) {
-        oss << item->print_result() << " "; // Each number is a dimension.
-    }
-    oss << std::endl;
-    return oss.str();
+std::string compiler::Item_ident_func::print_result(const uint32_t& indent,
+                                                    const bool& leaf) const {
+  std::ostringstream oss;
+
+  print_indent(indent, leaf, oss);
+  oss << " Identifier Function with name " << termcolor::red << name
+      << termcolor::reset << '\n';
+  return oss.str();
+}
+
+std::string compiler::Item_ident_array::print_result(const uint32_t& indent,
+                                                     const bool& leaf) const {
+  std::ostringstream oss;
+
+  print_indent(indent, leaf, oss);
+  oss << " Array Identifier with name " << termcolor::red << name
+      << termcolor::reset << ", and the shape is " << '\n';
+  for (uint32_t i = 0; i < array_shape.size(); i++) {
+    oss << array_shape[i]->print_result(
+        indent + 2,
+        i == array_shape.size() - 1);  // Each number is a dimension.
+  }
+  return oss.str();
 }

@@ -58,7 +58,7 @@ public:
     
     /**
      * @brief Prints the the parse result as an abstract syntax tree.
-     * @note This function will invoke all of its children's print_result() virtual function
+     * @note This function will invoke all of its children's print_result(indent, false) virtual function
      *       until there is no child anymore.
      *       You should implement this function in each <b>final</b> class.
      * 

@@ -39,7 +39,7 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     ID = 258,
+     IDENTIFIER = 258,
      ADD = 259,
      MINUS = 260,
      MUL = 261,
@@ -47,12 +47,12 @@
      MOD = 263,
      INC = 264,
      DEC = 265,
-     EQ = 266,
+     EQUAL = 266,
      NEQ = 267,
      GEQ = 268,
      LEQ = 269,
-     G = 270,
-     L = 271,
+     GT = 270,
+     LTT = 271,
      BIT_AND = 272,
      BIT_OR = 273,
      BIT_XOR = 274,
@@ -69,32 +69,31 @@
      FLOAT = 285,
      CHAR = 286,
      VOID = 287,
-     STRUCT_TOKEN = 288,
-     IF = 289,
-     ELSE = 290,
-     DO = 291,
-     WHILE = 292,
-     FOR = 293,
-     RETURN = 294,
-     BREAK = 295,
-     CONTINUE = 296,
-     CONST = 297,
-     ASSIGN = 298,
-     TRUE = 299,
-     FALSE = 300,
-     LBRACE = 301,
-     RBRACE = 302,
-     LPARENTHESIS = 303,
-     RPARENTHESIS = 304,
-     LSQUARE = 305,
-     RSQUARE = 306,
-     SEMICOLON = 307,
-     DOT = 308,
-     COMMA = 309
+     IF = 288,
+     ELSE = 289,
+     DO = 290,
+     WHILE = 291,
+     FOR = 292,
+     RETURN = 293,
+     BREAK = 294,
+     CONTINUE = 295,
+     CONST = 296,
+     ASSIGN = 297,
+     TRUE = 298,
+     FALSE = 299,
+     LBRACE = 300,
+     RBRACE = 301,
+     LPARENTHESIS = 302,
+     RPARENTHESIS = 303,
+     LSQUARE = 304,
+     RSQUARE = 305,
+     SEMICOLON = 306,
+     DOT = 307,
+     COMMA = 308
    };
 #endif
 /* Tokens.  */
-#define ID 258
+#define IDENTIFIER 258
 #define ADD 259
 #define MINUS 260
 #define MUL 261
@@ -102,12 +101,12 @@
 #define MOD 263
 #define INC 264
 #define DEC 265
-#define EQ 266
+#define EQUAL 266
 #define NEQ 267
 #define GEQ 268
 #define LEQ 269
-#define G 270
-#define L 271
+#define GT 270
+#define LTT 271
 #define BIT_AND 272
 #define BIT_OR 273
 #define BIT_XOR 274
@@ -124,35 +123,34 @@
 #define FLOAT 285
 #define CHAR 286
 #define VOID 287
-#define STRUCT_TOKEN 288
-#define IF 289
-#define ELSE 290
-#define DO 291
-#define WHILE 292
-#define FOR 293
-#define RETURN 294
-#define BREAK 295
-#define CONTINUE 296
-#define CONST 297
-#define ASSIGN 298
-#define TRUE 299
-#define FALSE 300
-#define LBRACE 301
-#define RBRACE 302
-#define LPARENTHESIS 303
-#define RPARENTHESIS 304
-#define LSQUARE 305
-#define RSQUARE 306
-#define SEMICOLON 307
-#define DOT 308
-#define COMMA 309
+#define IF 288
+#define ELSE 289
+#define DO 290
+#define WHILE 291
+#define FOR 292
+#define RETURN 293
+#define BREAK 294
+#define CONTINUE 295
+#define CONST 296
+#define ASSIGN 297
+#define TRUE 298
+#define FALSE 299
+#define LBRACE 300
+#define RBRACE 301
+#define LPARENTHESIS 302
+#define RPARENTHESIS 303
+#define LSQUARE 304
+#define RSQUARE 305
+#define SEMICOLON 306
+#define DOT 307
+#define COMMA 308
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 65 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
+#line 64 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.ypp"
 {
     compiler::basic_type                btype;
     compiler::Item_root*                item_root;               // root
@@ -164,7 +162,6 @@ typedef union YYSTYPE
     compiler::Item_expr_comma*          item_expr_comma;
     compiler::Item_ident*               item_ident;
     compiler::Item_ident_array*         item_ident_array;
-    compiler::Item_ident_pointer*       item_ident_pointer;
     compiler::Item_decl_array_init*     item_decl_array_init;
     compiler::Item_literal*             item_literal;
     compiler::Item_literal_array_init*  item_literal_array_init;
@@ -174,12 +171,11 @@ typedef union YYSTYPE
     compiler::Item_func_def_arg*        item_func_def_arg;
     compiler::Item_func_call_list*      item_func_call_list;
     compiler::Item_block*               item_block;
-    compiler::Item_struct_body*         item_struct_body;
     std::string*                        raw_string;
     char                                raw_char;
 }
 /* Line 1529 of yacc.c.  */
-#line 183 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
+#line 179 "/Users/chenhaobin/Documents/LLVMCompiler/src/parser/parser.hh"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -31,6 +31,9 @@ cl::opt<std::string> sourceFileName(cl::Positional, cl::desc("<input file>"),
 cl::opt<bool> emitLLVM("emit-llvm",
                        cl::desc("Output the LLVM IR for the source program"),
                        cl::Optional);
+cl::opt<bool> emitAST("emit-ast",
+                       cl::desc("Output the AST for the source program"),
+                       cl::Optional);
 cl::opt<bool> verbose("verbose", cl::desc("Enable verbose mode"), cl::Optional);
 cl::opt<compiler::OptLevel> optimizationLevel(
     cl::desc("Choose optimization level:"),
@@ -63,13 +66,18 @@ void compiler::CompilerRuntime::run() {
   yyset_in(fopen(inputFile.c_str(), "r"));
   yyparse();
   yylex_destroy();
+
+  // Do the job.
+  if (emitAST == true) {
+    astGenerate(errs());
+  }
 }
 
-void compiler::CompilerRuntime::codeGenerate(std::ostream& out) const {}
+void compiler::CompilerRuntime::codeGenerate(llvm::raw_ostream& out) const {}
 
-void compiler::CompilerRuntime::astGenerate(std::ostream& out) const {
+void compiler::CompilerRuntime::astGenerate(llvm::raw_ostream& out) const {
   errs() << "Generating AST for the source file...\n";
 
   assert(root != nullptr && "The root node cannot be null!");
-  out << root->print_result();
+  out << root->print_result(0, false);
 }

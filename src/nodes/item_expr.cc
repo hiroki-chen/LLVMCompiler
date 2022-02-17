@@ -18,6 +18,7 @@
 
 #include <nodes/item_expr.hh>
 #include <common/utils.hh>
+#include <common/termcolor.hh>
 
 compiler::Item_expr::Item_expr(const uint32_t& line_no) : Item(line_no) {}
 
@@ -42,26 +43,9 @@ compiler::Item_expr_unary::Item_expr_unary(const uint32_t& line_no,
 std::string compiler::Item_expr_cond::print_result(const uint32_t& indent,
                                                    const bool& leaf) const {
   std::ostringstream oss;
-  oss << "Node: Conditional Expression" << std::endl;
-  oss << "--Expression: " << std::endl << expr->print_result() << std::endl;
-  return oss.str();
-}
-
-std::string compiler::Item_expr_binary::print_result(const uint32_t& indent,
-                                                     const bool& leaf) const {
-  std::ostringstream oss;
-  oss << "Node: Binary Expression" << std::endl;
-  oss << "--Left Expression: " << std::endl << lhs->print_result() << std::endl;
-  oss << "--Right Expression: " << std::endl
-      << rhs->print_result() << std::endl;
-  return oss.str();
-}
-
-std::string compiler::Item_expr_unary::print_result(const uint32_t& indent,
-                                                    const bool& leaf) const {
-  std::ostringstream oss;
-  oss << "Node: Unary Expression" << std::endl;
-  oss << "--Expression: " << std::endl << expr->print_result() << std::endl;
+  print_indent(indent, leaf, oss);
+  oss << " Conditional Expression" << '\n';
+  oss << expr->print_result(indent + 2, true);
   return oss.str();
 }
 
@@ -74,5 +58,28 @@ std::string compiler::Item_expr_comma::print_result(const uint32_t& indent,
     oss << expressions[i]->print_result(
         indent + 2, i == expressions.size() - 1 ? true : false);
   }
+  return oss.str();
+}
+
+std::string compiler::Item_expr_binary::print_result(const uint32_t& indent,
+                                                     const bool& leaf) const {
+  std::ostringstream oss;
+
+  print_indent(indent, leaf, oss);
+  oss << " Binary Expression with type " << termcolor::bright_blue
+      << compiler::to_string(get_binary_type()) << termcolor::reset << '\n';
+  oss << lhs->print_result(indent + 2, false);
+  oss << rhs->print_result(indent + 2, true);
+  return oss.str();
+}
+
+std::string compiler::Item_expr_unary::print_result(const uint32_t& indent,
+                                                    const bool& leaf) const {
+  std::ostringstream oss;
+
+  print_indent(indent, leaf, oss);
+  oss << " Unary Expression with type " << termcolor::bright_blue
+      << compiler::to_string(get_unary_type()) << termcolor::reset << '\n';
+  oss << expr->print_result(indent + 2, false);
   return oss.str();
 }

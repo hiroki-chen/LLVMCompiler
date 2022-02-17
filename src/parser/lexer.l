@@ -84,7 +84,6 @@ CHAR        '\\?.'
 "break"      { return BREAK; }
 "for"        { return FOR; }
 "const"      { return CONST; }
-"struct"     { return STRUCT_TOKEN; }
 
 {HEX}        { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 16))); return HEX; }
 {OCTAL}      { yylval.raw_string = new std::string(std::to_string(std::stoul(std::string(yytext, yyleng), nullptr, 8))); return OCTAL; }
@@ -100,11 +99,11 @@ CHAR        '\\?.'
 "."          { return DOT; }
 ","          { return COMMA; }
 
-"=="         { return EQ; }
+"=="         { return EQUAL; }
 ">="         { return GEQ; }
 "<="         { return LEQ; }
-"<"          { return L; }
-">"          { return G; }
+"<"          { return LTT; }
+">"          { return GT; }
 "!="         { return NEQ; }
 
 "="          { return ASSIGN; }
@@ -126,7 +125,7 @@ CHAR        '\\?.'
 "/"          { return DIV; }
 "%"          { return MOD; }
 
-{ID}         { yylval.raw_string = new std::string(yytext, yyleng); return ID; }
+{ID}         { yylval.raw_string = new std::string(yytext, yyleng); return IDENTIFIER; }
 {CHAR}       { yylval.raw_char = yytext[1]; return CHAR; }
 {STRING}     { yylval.raw_string = new std::string(yytext, yyleng); return STRING; }
 {EMPTY}      { ; }

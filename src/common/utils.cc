@@ -14,6 +14,8 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <llvm/Support/ErrorHandling.h>
+
 #include <common/termcolor.hh>
 #include <common/utils.hh>
 
@@ -29,5 +31,108 @@ void compiler::print_indent(const uint32_t& indent, const bool& leaf,
     os << termcolor::bright_green << (std::string) "└──" << termcolor::reset;
   } else {
     os << termcolor::bright_green << (std::string) "├──" << termcolor::reset;
+  }
+}
+
+
+std::string compiler::to_string(const compiler::basic_type& type) {
+  switch (type) {
+    case INT_TYPE:
+      return "int";
+
+    case REAL_TYPE:
+      return "double";
+
+    case VOID_TYPE:
+      return "void";
+
+    case CHAR_TYPE:
+      return "char";
+
+    case STR_TYPE:
+      return "string";
+
+    default:
+      llvm::report_fatal_error("Unrecognized basic type!");
+  }
+}
+
+std::string compiler::to_string(const compiler::unary_type& type) {
+  switch (type) {
+    case LNOT_TYPE:
+      return "LOGIC_NOT";
+
+    case BITNEG_TYPE:
+      return "BIT_NEGATIVE";
+
+    case UMINUS_TYPE:
+      return "UNARY MINUS";
+
+    case UADD_TYPE:
+      return "UNARY ADD";
+
+    case UDEREFER_TYPE:
+      return "UNARY DEREFERENCE";
+
+    case UREF_TYPE:
+      return "UNARY REFERENCE";
+
+    default:
+      llvm::report_fatal_error("Unrecognized unary type!");
+  }
+}
+
+std::string compiler::to_string(const compiler::binary_type& type) {
+  switch (type) {
+    case ADD_TYPE:
+      return "Add";
+
+    case SUB_TYPE:
+      return "Sub";
+
+    case MUL_TYPE:
+      return "Mul";
+
+    case DIV_TYPE:
+      return "Div";
+
+    case MOD_TYPE:
+      return "Mod";
+
+    case BITOR_TYPE:
+      return "Bitwise_or";
+
+    case BITAND_TYPE:
+      return "Bitwise_and";
+
+    case BITXOR_TYPE:
+      return "Bitwise_xor";
+
+    case EQ_TYPE:
+      return "Conditional_equal";
+
+    case NEQ_TYPE:
+      return "Conditional_nonequal";
+
+    case G_TYPE:
+      return "Conditional_greater";
+
+    case L_TYPE:
+      return "Conditional_less";
+
+    case GE_TYPE:
+      return "Conditional_greater_or_equal";
+
+    case LE_TYPE:
+      return "Conditional_less_or_equal";
+
+    case LOR_TYPE:
+      return "Conditional_or";
+
+    case LAND_TYPE:
+      return "Conditional_and";
+
+    default:
+      llvm::report_fatal_error("Unrecognized binary type!");
   }
 }

@@ -70,6 +70,8 @@ file(GLOB_RECURSE COMPILER_SRC RELATIVE ${PROJECT_SOURCE_DIR}
     "src/parser/*.cc"
     "src/runtime/*.cc"
     "src/*.cc"
+    "src/nodes/*.cc"
+    "src/common/*.cc"
 )
 
 # Find the libraries that correspond to the LLVM components

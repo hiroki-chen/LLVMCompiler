@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <ostream>
 
+#include <common/types.hh>
 
 namespace compiler {
 /**
@@ -30,6 +31,12 @@ namespace compiler {
  * @param os
  */
 void print_indent(const uint32_t& indent, const bool& leaf, std::ostream& os);
+
+std::string to_string(const compiler::basic_type& type);
+
+std::string to_string(const compiler::unary_type& type);
+
+std::string to_string(const compiler::binary_type& type);
 
 }  // namespace compiler
 

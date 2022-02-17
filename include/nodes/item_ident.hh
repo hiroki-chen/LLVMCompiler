@@ -26,68 +26,95 @@ namespace compiler {
 
 /**
  * @brief Class for identifiers.
- * 
+ *
  */
 typedef class Item_ident : public Item_expr {
-protected:
-    const std::string name;
+ protected:
+  const std::string name;
 
-public:
-    virtual Item_expr::expr_type get_expr_type(void) const override { return Item_expr::expr_type::IDENTIFIER_TYPE; }
+ public:
+  typedef enum ident_type { VARIABLE, POINTER, ARRAY, FUNCTION } ident_type;
 
-    virtual std::string get_name(void) const { return name; } 
+  virtual Item_expr::expr_type get_expr_type(void) const override {
+    return Item_expr::expr_type::IDENTIFIER_TYPE;
+  }
 
-    Item_ident() = delete;
+  virtual Item_ident::ident_type get_ident_type(void) const {
+    return Item_ident::ident_type::VARIABLE;
+  }
 
-    Item_ident(const uint32_t& line_no, const std::string& name);
+  virtual std::string get_name(void) const { return name; }
 
-    virtual std::string print_result(const uint32_t& indent, const bool& leaf) const override;
+  Item_ident() = delete;
+
+  Item_ident(const uint32_t& line_no, const std::string& name);
+
+  virtual std::string print_result(const uint32_t& indent,
+                                   const bool& leaf) const override;
 } Item_ident;
 
 /**
  * @brief Class for array identifiers.
- * 
+ *
  */
 typedef class Item_ident_array final : public Item_ident {
-protected:
-    std::vector<Item_expr*> array_shape;
+ protected:
+  std::vector<Item_expr*> array_shape;
 
-public:
-    virtual void add_shape(Item_expr* const array_shape);
+ public:
+  virtual void add_shape(Item_expr* const array_shape);
 
-    Item_ident_array() = delete;
+  Item_ident_array() = delete;
 
-    Item_ident_array(const uint32_t& line_no, const std::string& name);
+  Item_ident_array(const uint32_t& line_no, const std::string& name);
 
-    virtual std::string print_result(const uint32_t& indent, const bool& leaf) const override;
+  virtual std::string print_result(const uint32_t& indent,
+                                   const bool& leaf) const override;
 
-    virtual ~Item_ident_array() override = default;
+  virtual ~Item_ident_array() override = default;
 } Item_ident_array;
 
 /**
  * @brief Class for pointers.
- * 
+ *
  */
 typedef class Item_ident_pointer final : public Item_ident {
-protected:
-    Item_expr* point_to;
+ protected:
+  Item_expr* point_to;
 
-public:
-    Item_ident_pointer() = delete;
+ public:
+  Item_ident_pointer() = delete;
 
-    Item_ident_pointer(const uint32_t& line_no, const std::string& name, Item_expr* point_to);
+  Item_ident_pointer(const uint32_t& line_no, const std::string& name,
+                     Item_expr* point_to);
 
-    virtual ~Item_ident_pointer() override = default;
+  virtual ~Item_ident_pointer() override = default;
 } Item_ident_pointer;
+
+typedef class Item_ident_func final : public Item_ident {
+ public:
+  virtual Item_ident::ident_type get_ident_type(void) const override {
+    return Item_ident::ident_type::FUNCTION;
+  }
+
+  Item_ident_func() = delete;
+
+  Item_ident_func(const uint32_t& lineno, const std::string& name);
+
+  virtual std::string print_result(const uint32_t& indent,
+                                   const bool& leaf) const override;
+
+  virtual ~Item_ident_func() override = default;
+} Item_ident_func;
 
 /**
  * @brief Class for struct.
- * 
+ *
  */
 typedef class Item_ident_struct final : public Item_ident {
-protected:
-    std::vector<Item_ident*> things;
+ protected:
+  std::vector<Item_ident*> things;
 } Item_ident_struct;
-} // namespace compiler
+}  // namespace compiler
 
 #endif

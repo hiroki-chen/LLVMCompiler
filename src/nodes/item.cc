@@ -14,32 +14,28 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <nodes/item.hh>
-
 #include <string>
 #include <sstream>
 
-compiler::Item::Item(const uint32_t& line_no)
-    : line_no(line_no)
-{
+#include <nodes/item.hh>
+#include <common/utils.hh>
+#include <common/termcolor.hh>
+
+compiler::Item::Item(const uint32_t& line_no) : line_no(line_no) {}
+
+compiler::Item_root::Item_root(const uint32_t& line_no) : Item(line_no) {}
+
+void compiler::Item_root::add_child(Item* const child) {
+  children.emplace_back(child);
 }
 
-compiler::Item_root::Item_root(const uint32_t& line_no)
-    : Item(line_no)
-{
-}
+std::string compiler::Item_root::print_result(const uint32_t& indent,
+                                              const bool& leaf) const {
+  std::ostringstream oss;
 
-void compiler::Item_root::add_child(Item* const child)
-{
-    children.emplace_back(child);
-}
-
-std::string compiler::Item_root::print_result(const uint32_t& indent, const bool& leaf) const
-{
-    std::ostringstream oss;
-    oss << "ROOT: ";
-    for (uint32_t i = 0; i < children.size(); i++) {
-        oss << children[i]->print_result() << std::endl;
-    }
-    return oss.str();
+  oss << "Program Root: " << termcolor::reset << '\n';
+  for (uint32_t i = 0; i < children.size(); i++) {
+    oss << children[i]->print_result(indent, i == children.size() - 1);
+  }
+  return oss.str();
 }

@@ -25,9 +25,8 @@
     //extern compiler::Symbol_table symbol_table;
     extern uint32_t yylineno;
     extern int yydebug;
-    extern int yylloc;
 
-    extern compiler::Compiler_runtime* compiler_runtime;
+    extern std::unique_ptr<compiler::CompilerRuntime> compiler_runtime;
 
     extern int yylex(void);
     extern int yyget_lineno(void);
@@ -73,7 +72,6 @@
     compiler::Item_expr_comma*          item_expr_comma;
     compiler::Item_ident*               item_ident;
     compiler::Item_ident_array*         item_ident_array;
-    compiler::Item_ident_pointer*       item_ident_pointer;
     compiler::Item_decl_array_init*     item_decl_array_init;
     compiler::Item_literal*             item_literal;
     compiler::Item_literal_array_init*  item_literal_array_init;
@@ -83,21 +81,20 @@
     compiler::Item_func_def_arg*        item_func_def_arg;
     compiler::Item_func_call_list*      item_func_call_list;
     compiler::Item_block*               item_block;
-    compiler::Item_struct_body*         item_struct_body;
     std::string*                        raw_string;
     char                                raw_char;
 }
 
-%token          ID 
+%token          IDENTIFIER 
 // Operators 
 %token          ADD MINUS MUL DIV MOD INC DEC
-%token          EQ NEQ GEQ LEQ G L
+%token          EQUAL NEQ GEQ LEQ GT LTT
 %token          BIT_AND BIT_OR BIT_XOR BIT_NEG
 %token          LOGIC_AND LOGIC_OR LOGIC_NOT
 // Numbers and string
 %token          DECIMAL OCTAL HEX STRING
 // Types
-%token          INT DOUBLE FLOAT CHAR VOID STRUCT_TOKEN
+%token          INT DOUBLE FLOAT CHAR VOID
 // Keywords
 %token          IF ELSE DO WHILE FOR RETURN BREAK CONTINUE CONST ASSIGN TRUE FALSE
 // Other symbols
@@ -112,8 +109,8 @@
 %left  BIT_OR
 %left  BIT_XOR
 %left  BIT_AND
-%left  NEQ EQ
-%left  L LEQ G GEQ
+%left  NEQ EQUAL
+%left  LTT LEQ GT GEQ
 %left  ADD MINUS
 %left  MUL DIV MOD
 %right LOGIC_NOT
@@ -123,11 +120,11 @@
 %type <item_block> BLOCK BlockItems
 %type <item_root> CompUnit
 %type <item_stmt> BlockItem Stmt ExpStmt AssignStmt Assignment eIfStmt ReturnStmt WhileStmt ForStmt BreakStmt ContinueStmt
-%type <item_stmt_decl> Decl ConstDecl VarDecl StructDecl ConstDeclStmt VarDeclStmt StructDeclStmt
+%type <item_stmt_decl> Decl ConstDecl VarDecl  ConstDeclStmt VarDeclStmt 
 %type <item_func_def> FuncDef
 %type <item_func_def_list> FuncDefList
 %type <item_func_def_arg> FuncParam FuncParamNormal FuncParamArray
-%type <item_decl> VarDef VarDefNormal VarDefArray ConstDef ConstDefNormal ConstDefArray StructDef
+%type <item_decl> VarDef VarDefNormal VarDefArray ConstDef ConstDefNormal ConstDefArray 
 %type <item_expr> Exp AddExp MulExp BitExp LOrExp LAndExp EqExp RelExp BitAndExp BitOrExp BitXorExp UnaryExp PrimaryExp FunctionCall
 %type <item_expr_comma> CommaExp
 %type <item_ident> Ident LVal
@@ -135,9 +132,7 @@
 %type <item_func_call_list> FunctionRParams
 %type <item_literal_array_init> ArrayInitVal ArrayInitValHelper
 %type <item_literal> LITERAL
-%type <item_ident_pointer> POINTER
-%type <item_struct_body> Body
-%type <raw_string> ID STRING DECIMAL HEX OCTAL
+%type <raw_string> IDENTIFIER STRING DECIMAL HEX OCTAL
 %type <raw_char> CHAR
 
 %start CompUnit
@@ -145,17 +140,15 @@
 
 CompUnit: CompUnit Decl         { $$->add_child($<item_decl>2); }
         | CompUnit FuncDef      { $$->add_child($<item_func_def>2); }
-        | Decl                  { $$ = new compiler::Item_root(yyget_lineno()); compiler_runtime->set_root($$); $$->add_child($<item_decl>1); }
-        | FuncDef               { $$ = new compiler::Item_root(yyget_lineno()); compiler_runtime->set_root($$); $$->add_child($<item_func_def>1); }
+        | Decl                  { $$ = new compiler::Item_root(yyget_lineno()); compiler_runtime->setRoot($$); $$->add_child($<item_decl>1); }
+        | FuncDef               { $$ = new compiler::Item_root(yyget_lineno()); compiler_runtime->setRoot($$); $$->add_child($<item_func_def>1); }
         ;
 
 Decl: VarDeclStmt
     | ConstDeclStmt
-    | StructDeclStmt
     ;
 
-StructDeclStmt: StructDecl SEMICOLON { $$ = $1; }
-              ;
+
 
 VarDeclStmt: VarDecl SEMICOLON { $$ = $1; }
            ;
@@ -179,34 +172,12 @@ ConstDecl: CONST BType ConstDef      { $$ = new compiler::Item_stmt_decl(yyget_l
          | BType CONST ConstDef      { $$ = new compiler::Item_stmt_decl(yyget_lineno(), $1); $$->add_declaration($3); }
          ;
 
-StructDecl: STRUCT_TOKEN StructDef     { $$ = new compiler::Item_stmt_decl(yyget_lineno(), compiler::basic_type::STRUCT); $$->add_declaration($2); }
-          | StructDecl COMMA StructDef { $$->add_declaration($3); }
-          ;
-
-StructDef: Ident                       { $$ = new compiler::Item_decl_struct(yyget_lineno(), $1, nullptr, true); }
-         | Ident LBRACE RBRACE         { $$ = new compiler::Item_decl_struct(yyget_lineno(), $1, nullptr, true); }
-         | Ident LBRACE Body RBRACE    { $$ = new compiler::Item_decl_struct(yyget_lineno(), $1, $3, false);}
-         ;      
-
-Body: Decl                        { $$ = new compiler::Item_struct_body(yyget_lineno()); $$->add_body($1); }
-    | Body Decl                   { $$ = $1; $$->add_body($2); }
-    | FuncDef                     { $$ = new compiler::Item_struct_body(yyget_lineno()); $$->add_body($1); }
-    | Body FuncDef                { $$ = $1; $$->add_body($2); }            
-    ;
-
 VarDef: VarDefNormal
       | VarDefArray
       ;
 
 VarDefNormal: Ident ASSIGN LOrExp             { $$ = new compiler::Item_decl_var_init(yyget_lineno(), $1, $3, false); }
             | Ident                        { $$ = new compiler::Item_decl_var(yyget_lineno(), $1); }
-            | POINTER ASSIGN LOrExp           { $$ = new compiler::Item_decl_pointer_init(yyget_lineno(), $1, $3, false); }
-            | POINTER                      { $$ = new compiler::Item_decl_pointer(yyget_lineno(), $1); }
-            ;
-
-POINTER: MUL ID                          { $$ = new compiler::Item_ident_pointer(yyget_lineno(), *$2); }
-       | MUL POINTER                     { $$ = $2; $2->add_shape(); }
-       ;
        
 VarDefArray: ArrayID ASSIGN ArrayInitVal    { $$ = new compiler::Item_decl_array_init(yyget_lineno(), $1, $3, false); }
            | ArrayID                        { $$ = new compiler::Item_decl_array(yyget_lineno(), $1); }
@@ -227,8 +198,7 @@ ConstDef: ConstDefNormal
         ;
 
 ConstDefNormal: Ident ASSIGN LOrExp           { $$ = new compiler::Item_decl_var_init(yyget_lineno(), $1, $3, true); }
-              | POINTER ASSIGN LOrExp         { $$ = new compiler::Item_decl_pointer_init(yyget_lineno(), $1, $3, true); }
-              ;
+        ;
 
 ConstDefArray: ArrayID ASSIGN ArrayInitVal      { $$ = new compiler::Item_decl_array_init(yyget_lineno(), $1, $3, true); }
              ;
@@ -265,7 +235,7 @@ FuncParamArray: BType Ident LSQUARE RSQUARE                {
               | FuncParamArray LSQUARE Exp RSQUARE          { $$ = $1; static_cast<compiler::Item_ident_array*>($$->get_identifier())->add_shape($3); }
               ;
 
-Ident: ID       { $$ = new compiler::Item_ident(yyget_lineno(), *$1); }
+Ident: IDENTIFIER       { $$ = new compiler::Item_ident(yyget_lineno(), *$1); }
      ;
 
 ArrayInitValHelper: ArrayInitValHelper COMMA ArrayInitVal     { $$ = $1; $$->add_value($3); }
@@ -455,15 +425,15 @@ LAndExp: LAndExp LOGIC_AND BitExp    { $$ = new compiler::Item_expr_binary(yyget
        | BitExp
        ;
 
-EqExp: RelExp EQ RelExp             { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::EQ_TYPE, $1, $3); }
+EqExp: RelExp EQUAL RelExp             { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::EQ_TYPE, $1, $3); }
      | RelExp NEQ RelExp            { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::NEQ_TYPE, $1, $3); }
      | RelExp
      ;
 
 RelExp: RelExp GEQ RelExp         { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::GE_TYPE, $1, $3); }
       | RelExp LEQ RelExp         { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::LE_TYPE, $1, $3); }
-      | RelExp G RelExp           { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::G_TYPE, $1, $3); }
-      | RelExp L RelExp           { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::L_TYPE, $1, $3); }
+      | RelExp GT RelExp           { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::G_TYPE, $1, $3); }
+      | RelExp LTT RelExp           { $$ = new compiler::Item_expr_binary(yyget_lineno(), compiler::binary_type::L_TYPE, $1, $3); }
       | AddExp
       ;
 
